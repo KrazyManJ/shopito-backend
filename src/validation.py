@@ -24,12 +24,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return password_hash.verify(plain_password, hashed_password)
 
 
-def verify_authentication(username: str, input_password: str) -> bool:
-    first_found_user = db.get_user_by_username(username)
+async def verify_authentication(username: str, input_password: str) -> bool:
+    first_found_user = await db.get_user_by_username(username)
     return first_found_user and verify_password(input_password, first_found_user.password_hash)
 
 
-def get_current_user_info(token: Annotated[str, Depends(oauth2_scheme)]) -> UserInfo:
+async def get_current_user_info(token: Annotated[str, Depends(oauth2_scheme)]) -> UserInfo:
     payload = decode_access_token(token)
     if payload is None:
         raise HTTPException(
@@ -37,7 +37,7 @@ def get_current_user_info(token: Annotated[str, Depends(oauth2_scheme)]) -> User
             detail="Could not validate credentials",
         )
 
-    first_found_user = db.get_user_by_username(payload.username)
+    first_found_user = await db.get_user_by_username(payload.username)
     if first_found_user is None:
         raise HTTPException(status_code=404, detail="Not found")
 

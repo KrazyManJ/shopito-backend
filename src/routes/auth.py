@@ -12,23 +12,27 @@ from src.token import create_access_token
 
 router = APIRouter(tags=["Auth"])
 
+
 @router.post("/login")
 async def login(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Token:
-    if not validation.verify_authentication(form_data.username, form_data.password):
+    if not await validation.verify_authentication(form_data.username, form_data.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials"
         )
 
+    user = await db.get_user_by_username(form_data.username)
+
     return Token(
         access_token=create_access_token(
-            username=form_data.username,
+            username=user.username,
             expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         ),
         token_type="bearer"
     )
+
 
 @router.post("/register",
              status_code=status.HTTP_201_CREATED,
@@ -36,7 +40,8 @@ async def login(
 async def register(
         register_form: RegisterForm,
 ):
-    db.register_user(register_form.username, validation.hash_password(register_form.password))
+    await db.register_user(register_form.username, validation.hash_password(register_form.password))
+
 
 @router.get("/user")
 async def get_user(

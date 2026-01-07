@@ -1,0 +1,10 @@
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - shopito_mongo:/shopito_mongo
+volumes:
+  shopito_mongo:
+    name: "shopito-mongo"
