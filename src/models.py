@@ -16,3 +16,8 @@ class UserInfo(BaseModel):
 
 class User(UserInfo):
     password_hash: str
+
+
+class RegisterForm(BaseModel):
+    username: str
+    password: str

@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from src import validation
+from src import validation, db
 from src.constants import ACCESS_TOKEN_EXPIRE_MINUTES
-from src.models import Token, User, UserInfo
+from src.models import Token, User, UserInfo, RegisterForm
 from src.token import create_access_token
 
 router = APIRouter(tags=["Auth"])
@@ -30,8 +30,16 @@ async def login(
         token_type="bearer"
     )
 
-@router.get("/me")
-async def get_me(
+@router.post("/register",
+             status_code=status.HTTP_201_CREATED,
+             )
+async def register(
+        register_form: RegisterForm,
+):
+    db.register_user(register_form.username, validation.hash_password(register_form.password))
+
+@router.get("/user")
+async def get_user(
         user: Annotated[UserInfo, Depends(validation.get_current_user_info)]
 ) -> UserInfo:
     return user
