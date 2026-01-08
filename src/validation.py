@@ -1,16 +1,13 @@
-from datetime import timedelta
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 from starlette import status
 
 from src import db
-from src.constants import ACCESS_TOKEN_EXPIRE_MINUTES
-from src.db import User
-from src.models import Token, UserInfo
-from src.token import decode_access_token, create_access_token
+from src.models import UserInfo, User
+from src.token import decode_access_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
@@ -29,7 +26,7 @@ async def verify_authentication(username: str, input_password: str) -> bool:
     return first_found_user and verify_password(input_password, first_found_user.password_hash)
 
 
-async def get_current_user_info(token: Annotated[str, Depends(oauth2_scheme)]) -> UserInfo:
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
     payload = decode_access_token(token)
     if payload is None:
         raise HTTPException(
@@ -41,4 +38,4 @@ async def get_current_user_info(token: Annotated[str, Depends(oauth2_scheme)]) -
     if first_found_user is None:
         raise HTTPException(status_code=404, detail="Not found")
 
-    return UserInfo(**first_found_user.model_dump())
+    return User(**first_found_user.model_dump())

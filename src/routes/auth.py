@@ -45,6 +45,6 @@ async def register(
 
 @router.get("/user")
 async def get_user(
-        user: Annotated[UserInfo, Depends(validation.get_current_user_info)]
+        user: Annotated[UserInfo, Depends(validation.get_current_user)]
 ) -> UserInfo:
     return user
