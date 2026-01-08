@@ -37,6 +37,7 @@ class ShoppingList(BaseModel):
     id: str
     name: str
     description: str = ""
+    created_at: int
     updated_at: int
     is_deleted: bool
 
@@ -49,6 +50,7 @@ class ShoppingItem(BaseModel):
     buy_time: Optional[int] = None
     location: Optional[Location] = None
     list_id: str
+    created_at: int
     updated_at: int
     is_deleted: bool
 
