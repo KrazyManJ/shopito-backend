@@ -29,8 +29,7 @@ async def login(
         access_token=create_access_token(
             username=user.username,
             expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        ),
-        token_type="bearer"
+        )
     )
 
 
@@ -39,8 +38,22 @@ async def login(
              )
 async def register(
         register_form: RegisterForm,
-):
+) -> Token:
+    existing_user = await db.get_user_by_username(register_form.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Username already exists"
+        )
+
     await db.register_user(register_form.username, validation.hash_password(register_form.password))
+
+    return Token(
+        access_token=create_access_token(
+            username=register_form.username,
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        )
+    )
 
 
 @router.get("/user")
